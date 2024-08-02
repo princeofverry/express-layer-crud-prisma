@@ -41,6 +41,41 @@ app.post("/products", async (req, res) => {
   });
 });
 
+app.delete("/products/:id", async (req, res) => {
+  // ngambil params ":"
+  const productId = req.params.id; // masih string
+
+  await prisma.product.delete({
+    where: {
+      id: parseInt(productId),
+    },
+  });
+
+  res.send("product deleted");
+});
+
+app.put("/products/:id", async (req, res) => {
+  // put ambil id sama body-nya (combine post delete)
+  const productId = req.params.id; //ambil params id
+  const productdata = req.body;
+
+  const product = await prisma.product.update({
+    where: {
+      id: Number(productId),
+    },
+    data: {
+      description: productdata.description,
+      name: productdata.name,
+      image: productdata.image,
+      price: productdata.price,
+    },
+  });
+  res.send({
+    data: product,
+    message: "update successfully",
+  });
+});
+
 app.listen(PORT, () => {
   console.log("express API running in port: " + PORT);
 });
