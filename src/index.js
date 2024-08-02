@@ -23,6 +23,21 @@ app.get("/products", async (req, res) => {
   res.send(products);
 });
 
+app.get("/products/:id", async (req, res) => {
+  const productId = req.params.id;
+
+  const product = await prisma.product.findUnique({
+    where: {
+      id: parseInt(productId),
+    },
+  });
+  if (!product) {
+    return res.status(404).send("product not found");
+  }
+
+  res.send(product);
+});
+
 app.post("/products", async (req, res) => {
   const newProductData = req.body;
   const product = await prisma.product.create({
@@ -54,10 +69,46 @@ app.delete("/products/:id", async (req, res) => {
   res.send("product deleted");
 });
 
+// patch -> menambal jadi ga semuanya
+// put -> replace
+
 app.put("/products/:id", async (req, res) => {
   // put ambil id sama body-nya (combine post delete)
   const productId = req.params.id; //ambil params id
   const productdata = req.body;
+
+  if (
+    !(
+      productdata.image &&
+      productdata.description &&
+      productdata.name &&
+      productdata.price
+    )
+  ) {
+    return res.status(400).send("some field are missing");
+  }
+
+  const product = await prisma.product.update({
+    where: {
+      id: Number(productId),
+    },
+    data: {
+      description: productdata.description,
+      name: productdata.name,
+      image: productdata.image,
+      price: productdata.price,
+    },
+  });
+  res.send({
+    data: product,
+    message: "update successfully",
+  });
+});
+
+app.patch("/products/:id", async (req, res) => {
+  // put ambil id sama body-nya (combine post delete)
+  const productId = req.params.id; //ambil params id
+  const productdata = req.body; // ambil data-nya
 
   const product = await prisma.product.update({
     where: {
